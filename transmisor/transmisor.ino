@@ -60,7 +60,24 @@ void loop() {
 
   currentMillis = millis();
   if (currentMillis - previousMillis > interval) {
+    pulse1Sec = pulseCount;
+    pulseCount = 0;
+
+    flowRate = ((1000.0 / (millis() - previousMillis)) * pulse1Sec) / calibrationFactor;
     previousMillis = millis();
+
+    flowMilliLitres = (flowRate / 60) * 1000;
+    totalMilliLitres += flowMilliLitres;
+
+    Serial.print("Flow rate: ");
+    Serial.print(int(flowMilliLitres));  // Print the integer part of the variable
+    Serial.print("mL/min");
+    Serial.print("\t");       // Print tab space
+
+    // Print the cumulative total of litres flowed since starting
+    Serial.print("Output Liquid Quantity: ");
+    Serial.print(totalMilliLitres);
+    Serial.println("mL");
 
     // read the analog in value:
     sensorValue = analogRead(A0);
