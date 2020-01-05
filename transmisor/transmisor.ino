@@ -52,7 +52,7 @@ void setup() {
   }
 
   u8g2.begin();
-  u8g2.setFont(u8g2_font_logisoso62_tn);
+  u8g2.setFont(u8g2_font_logisoso20_tn);
   u8g2.setFontMode(0);    // enable transparent mode, which is faster
 }
 
@@ -84,8 +84,8 @@ void loop() {
     // map to range. The pot goes from about 3 to 1023. This makes the sent value be between 0 and 999 to fit on the OLED
     outputValue = map(sensorValue, 3, 1023, 0, 999);
 
-    char intToPrint[5];
-    itoa(outputValue, intToPrint, 10); //integer to string conversion for OLED library
+    char intToPrint[10];
+    itoa(totalMilliLitres, intToPrint, 10); //integer to string conversion for OLED library
     u8g2.firstPage();
     u8g2.drawUTF8(0, 64, intToPrint);
     u8g2.nextPage();
