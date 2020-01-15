@@ -14,8 +14,10 @@ const char *password = "pingu4prez";
 
 long currentMillis = 0;
 long previousMillis = 0;
+long currentMillis_wifi = 0;
+long previousMillis_wifi = 0;
 
-int interval = 300;
+int interval = 1000;
 float calibrationFactor = 4.5;
 float flowRate;
 
@@ -31,6 +33,9 @@ void IRAM_ATTR pulseCounter(){
   pulseCount++;
 }
 
+WiFiClient client;
+const char * host = "192.168.4.1";
+const int httpPort = 80;
 
 void setup() {
   Serial.begin(115200);
@@ -48,6 +53,9 @@ void setup() {
   Serial.println("OLED init...");
   // SSD1306_SWITCHCAPVCC = generate display voltage from 3.3V internally
   display.begin(SSD1306_SWITCHCAPVCC, 0x3C); // Address 0x3C for 128x32
+  display.setTextSize(1);
+  display.setTextColor(SSD1306_WHITE);
+  display.setCursor(0,0);
 
   Serial.println("OLED begun");
 
@@ -61,21 +69,18 @@ void setup() {
   display.clearDisplay();
   display.display();
 
-  Serial.println("IO test");
-
   // text display tests
   display.setTextSize(1);
   display.setTextColor(SSD1306_WHITE);
   display.setCursor(0,0);
 
-  display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
   display.clearDisplay();
   display.setTextColor(WHITE);
   display.setTextSize(1);
   display.setCursor(0, 2);
   display.println("Inicio...");
   display.display(); // actually display all of the above
-  
+
   // Explicitly set the ESP8266 to be a WiFi-client
   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
@@ -89,12 +94,13 @@ void setup() {
     display.setCursor(35,20);  display.println(password);
     display.display();
 
-    delay(300);    
+    delay(300);
   }
 }
 
 void loop() {
   currentMillis = millis();
+  currentMillis_wifi = millis();
   if (currentMillis - previousMillis > interval) {
     pulse1Sec = pulseCount;
     pulseCount = 0;
@@ -114,33 +120,38 @@ void loop() {
     Serial.print("Output Liquid Quantity: ");
     Serial.print(totalMilliLitres);
     Serial.println("mL");
+  }
+
+  if (currentMillis_wifi - previousMillis_wifi > 3*interval) {
+    previousMillis_wifi = millis();
 
     // Use WiFiClient class to create TCP connections
-    WiFiClient client;
-    const char * host = "192.168.4.1";
-    const int httpPort = 80;
+    // WiFiClient client;
 
-    if (!client.connect(host, httpPort)) {
-      Serial.println("connection failed");
-      return;
-    }
+    if (client.connect(host, httpPort)) {
+      Serial.println("connected");
+      // We now create a URI for the request. Something like /data/?sensor_reading=123
 
-    // We now create a URI for the request. Something like /data/?sensor_reading=123
-    String url = "/data/";
-    url += "?sensor_reading=";
-    url += 50;
+      String url = "/data/";
+      url += "?sensor_reading=";
+      url += 50;
 
-    // This will send the request to the server
-    client.print(String("GET ") + url + " HTTP/1.1\r\n" +
-                "Host: " + host + "\r\n" +
-                "Connection: close\r\n\r\n");
-    unsigned long timeout = millis();
-    while (client.available() == 0) {
-      if (millis() - timeout > 5000) {
-        Serial.println(">>> Client Timeout !");
-        client.stop();
-        return;
+      // This will send the request to the server
+      client.print(String("GET ") + url + " HTTP/1.1\r\n" +
+                  "Host: " + host + "\r\n" +
+                  "Connection: close\r\n\r\n");
+      unsigned long timeout = millis();
+      while (client.available() == 0) {
+        if (millis() - timeout > 5000) {
+          Serial.println(">>> Client Timeout !");
+          client.stop();
+          return;
+        }
       }
+    }
+    else{
+      Serial.println("connection failed");
+      delay(200);
     }
   }
 }
