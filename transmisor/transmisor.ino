@@ -83,8 +83,9 @@ void setup() {
   display.display(); // actually display all of the above
 
   // Explicitly set the ESP8266 to be a WiFi-client
-  WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
+  WiFi.mode(WIFI_STA);
+
 
   while (WiFi.status() != WL_CONNECTED) {
     display.clearDisplay();
