@@ -17,8 +17,8 @@ long previousMillis = 0;
 long currentMillis_wifi = 0;
 long previousMillis_wifi = 0;
 
-int interval = 1000;
-float calibrationFactor = 4.5;
+int interval = 300;
+float calibrationFactor = 8.5;//4.5
 float flowRate;
 
 volatile byte pulseCount;
@@ -47,6 +47,7 @@ void setup() {
   flowMilliLitres = 0;
   totalMilliLitres = 0;
   previousMillis = 0;
+  previousMillis_wifi = 0;
 
   attachInterrupt(digitalPinToInterrupt(sensorFlujo), pulseCounter, FALLING);
 
@@ -96,6 +97,10 @@ void setup() {
 
     delay(300);
   }
+  display.clearDisplay();
+  display.setCursor(0,2);    display.println("ONLINE!");
+  display.display();
+
 }
 
 void loop() {
@@ -120,9 +125,14 @@ void loop() {
     Serial.print("Output Liquid Quantity: ");
     Serial.print(totalMilliLitres);
     Serial.println("mL");
+    // oled
+    display.clearDisplay();
+    display.setCursor(0,2);    display.println("ONLINE! [Total ml]");
+    display.setCursor(0,10);   display.println(totalMilliLitres);
+    display.display();
   }
 
-  if (currentMillis_wifi - previousMillis_wifi > 3*interval) {
+  if (currentMillis_wifi - previousMillis_wifi > 10*interval) {
     previousMillis_wifi = millis();
 
     // Use WiFiClient class to create TCP connections
@@ -134,24 +144,24 @@ void loop() {
 
       String url = "/data/";
       url += "?sensor_reading=";
-      url += 50;
+      url += totalMilliLitres;
 
       // This will send the request to the server
       client.print(String("GET ") + url + " HTTP/1.1\r\n" +
                   "Host: " + host + "\r\n" +
                   "Connection: close\r\n\r\n");
-      unsigned long timeout = millis();
-      while (client.available() == 0) {
-        if (millis() - timeout > 5000) {
-          Serial.println(">>> Client Timeout !");
-          client.stop();
-          return;
-        }
-      }
+      // unsigned long timeout = millis();
+      // while (client.available() == 0) {
+      //   if (millis() - timeout > 5000) {
+      //     Serial.println(">>> Client Timeout !");
+      //     client.stop();
+      //     return;
+      //   }
+      // }
     }
     else{
       Serial.println("connection failed");
-      delay(200);
+      //delay(200);
     }
   }
 }
