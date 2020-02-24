@@ -46,11 +46,10 @@
 
 // initialize the library by associating any needed LCD interface pin
 // with the arduino pin number it is connected to
-const int rs = 12, en = 11, d4 = 5, d5 = 4, d6 = 3, d7 = 2;
+const int rs = 2, en = 3, d4 = 4, d5 = 5, d6 = 6, d7 = 7;
 LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
 
 StaticJsonDocument<200> doc;
-
 
 void setup() {
   Serial.begin(115200);
@@ -71,8 +70,16 @@ void loop() {
   long totalml = doc["totalml"];
   const char* typeSensor = doc["sensor"];
 
-  lcd.home();  lcd.print("Aguita gastada:");
-  lcd.setCursor(0,1);  lcd.print(totalml);  lcd.print(" [ml]");
+  long totallitros = totalml/1000;
+  long mtcubicos = totallitros/1000;
+  long precioporm3 = mtcubicos*463;
+
+  long precio = 663 + precioporm3;
+
+  lcd.home();  
+  lcd.print("Agua :"); lcd.print(totalml); lcd.print(" [ml]");
+  lcd.setCursor(0,1);  
+  lcd.print("Costo :"); lcd.print(precio); lcd.print(" $");
   // lcd.setCursor(0, 33);
   // lcd.print(millis() / 1000);
   delay(1000);
