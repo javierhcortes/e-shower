@@ -41,22 +41,34 @@
 */
 
 // include the library code:
-#include <LiquidCrystal.h>
+#include <LiquidCrystal_I2C.h>
 #include <ArduinoJson.h>
+#include <Wire.h> 
 
-// initialize the library by associating any needed LCD interface pin
-// with the arduino pin number it is connected to
-const int rs = 2, en = 3, d4 = 4, d5 = 5, d6 = 6, d7 = 7;
-LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
-
+LiquidCrystal_I2C lcd(0x3F,16,2);  // set the LCD address to 0x3F for a 16 chars and 2 line display
 StaticJsonDocument<200> doc;
+
+byte shower[8] = {
+  0b11100,
+  0b00100,
+  0b01110,
+  0b11111,
+  0b00000,
+  0b10101,
+  0b10101,
+  0b10101
+};
 
 void setup() {
   Serial.begin(115200);
   while (!Serial) continue;
   // set up the LCD's number of columns and rows:
-  lcd.begin(16, 2);
+  
+  lcd.init();
+  lcd.backlight();
+  //lcd.createChar(0, shower);
   lcd.print("Conectando...");
+  Serial.print("Conectando...");
 }
 
 void loop() {
