@@ -1,13 +1,9 @@
-#include <ESP8266WiFi.h>
-#include <ArduinoJson.h>
-
 // librerias para display oled
 #include <SPI.h>
 #include <Wire.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 
-Adafruit_SSD1306 display = Adafruit_SSD1306(128, 32, &Wire);
 
 const char *ssid = "poopssid";
 const char *password = "pingu4prez";
@@ -40,6 +36,7 @@ const int httpPort = 80;
 void setup() {
   Serial.begin(115200);
   while (!Serial) continue;
+  
   pinMode(sensorFlujo, INPUT_PULLUP);
 
   pulseCount = 0;
@@ -51,36 +48,12 @@ void setup() {
 
   attachInterrupt(digitalPinToInterrupt(sensorFlujo), pulseCounter, FALLING);
 
-  Serial.println("OLED init...");
-  // SSD1306_SWITCHCAPVCC = generate display voltage from 3.3V internally
-  display.begin(SSD1306_SWITCHCAPVCC, 0x3C); // Address 0x3C for 128x32
-  display.setTextSize(1);
-  display.setTextColor(SSD1306_WHITE);
-  display.setCursor(0,0);
-
-  Serial.println("OLED begun");
-
-  // Show image buffer on the display hardware.
-  // Since the buffer is intialized with an Adafruit splashscreen
-  // internally, this will display the splashscreen.
-  // display.display();
-  // delay(1000);
+  Serial.println("attachInterrupt.");
 
   // Clear the buffer.
   display.clearDisplay();
   display.display();
-
-  // text display tests
-  display.setTextSize(1);
-  display.setTextColor(SSD1306_WHITE);
-  display.setCursor(0,0);
-
-  display.clearDisplay();
-  display.setTextColor(WHITE);
-  display.setTextSize(1);
-  display.setCursor(0, 2);
   display.println("Inicio...");
-  display.display(); // actually display all of the above
 
   // Explicitly set the ESP8266 to be a WiFi-client
   WiFi.begin(ssid, password);
@@ -88,14 +61,7 @@ void setup() {
 
 
   while (WiFi.status() != WL_CONNECTED) {
-    display.clearDisplay();
-    display.setCursor(0,2);    display.println("Conectando...");
-    display.setCursor(0,10);   display.println("ssid: ");
-    display.setCursor(35,10);  display.println(ssid);
-    display.setCursor(0,20);   display.println("pass: ");
-    display.setCursor(35,20);  display.println(password);
-    display.display();
-
+    
     delay(300);
   }
   display.clearDisplay();
@@ -126,11 +92,7 @@ void loop() {
     Serial.print("Output Liquid Quantity: ");
     Serial.print(totalMilliLitres);
     Serial.println("mL");
-    // oled
-    display.clearDisplay();
-    display.setCursor(0,2);    display.println("ONLINE! [Total ml]");
-    display.setCursor(0,10);   display.println(totalMilliLitres);
-    display.display();
+   
   }
 
   if (currentMillis_wifi - previousMillis_wifi > 10*interval) {

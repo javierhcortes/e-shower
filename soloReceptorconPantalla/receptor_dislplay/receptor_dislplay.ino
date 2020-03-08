@@ -80,14 +80,31 @@ void handleSentVar() {
     Serial.print("Valor Obtenido...");
     Serial.println(readingInt);
     
-    server.send(200, "text/html", "Data received");
+    //server.send(200, "text/html", "Data received");
 
     lcd.home();  
     lcd.setCursor(0,1);
-    lcd.print(readingInt);  lcd.print(" [L]");   
+
+    int totalml = readingInt;
+    
+
+    long totallitros = totalml/1000.0;
+    long mtcubicos = totallitros/1000.0;
+    long precioporm3 = mtcubicos*463;
+
+    long precio = 663 + precioporm3;
+
+    lcd.home();  
+    lcd.print("Agua :"); lcd.print(totallitros); lcd.print(" [L]");
+    lcd.setCursor(0,1);  
+    lcd.print("Costo :"); lcd.print(precio); lcd.print(" $");
+    // lcd.setCursor(0, 33);
+    // lcd.print(millis() / 1000);
+    //delay(1000);
+    //lcd.print(readingInt);  lcd.print(" [L]");   
   }
   else{
     Serial.println("Error: no existe sensor_reading");
-    delay(100);
+    //delay(100);
   }
 }
